@@ -11,33 +11,34 @@ from sklearn.linear_model import LogisticRegression
 class GaussianNaiveBayes_c():
 
     def __init__(self):
-        pass
+        self._model = GaussianNB()
 
     def description(self):
         return 'GNB'
         
     def predict_p(self, X_train, y_train, X_test):
-        return GaussianNB().fit(X_train, y_train).predict_proba(X_test)[:,-1]     
+        return self._model.fit(X_train, y_train).predict_proba(X_test)[:,-1]     
         
 class RandomForest_c():
 
-    def __init__(self):
-        pass
+    def __init__(self, n_estimators=500):
+        self.n_estimators = n_estimators
+        self._model = RandomForestClassifier(n_estimators=self.n_estimators)
 
     def description(self):
-        return 'RF'
+        return 'RF %s' % self.n_estimators
 
     def predict_p(self, X_train, y_train, X_test): 
-        return RandomForestClassifier(n_estimators=500).fit(X_train, y_train).predict_proba(X_test)[:,-1]
+        return self._model.fit(X_train, y_train).predict_proba(X_test)[:,-1]
 
 class LogisticRegression_c():
 
     def __init__(self):
-        pass
+        self._model = LogisticRegression()
 
     def description(self):
         return 'LR'
 
     def predict_p(self, X_train, y_train, X_test): 
-        return RandomForestClassifier(n_estimators=500).fit(X_train, y_train).predict_proba(X_test)[:,-1]
+        return self._model.fit(X_train, y_train).predict_proba(X_test)[:,-1]
     
