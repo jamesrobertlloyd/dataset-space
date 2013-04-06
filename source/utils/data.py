@@ -46,3 +46,9 @@ def split_into_folds(data, n=5, seed=0):
             folds.append({'X_train' : data['X'][train_i,], 'y_train' : data['y'][train_i], 'X_test' : data['X'][test_i,], 'y_test' : data['y'][test_i]})
             
     return {'folds' : folds}
+    
+def standardise_inputs(data):
+    #### TODO
+    # - Do I even want this function
+    #   - Should I return empirical quantiles, or should it just apply a linear transformation?
+    return data
