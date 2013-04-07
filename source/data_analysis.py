@@ -21,10 +21,11 @@ def create_csv_summary(results_dir):
             data_dictionary[method_description][os.path.splitext(data_name)[0]] = score
     # Create array
     print 'Creating array'
-    data_array = np.zeros((len(method_descriptions), len(data_names)))
+    data_array = -0.01 * np.ones((len(method_descriptions), len(data_names)))
     for (i, method_description) in enumerate(method_descriptions):
         for (j, data_name) in enumerate(data_names):
-            data_array[i, j] = data_dictionary[method_description][data_name]
+            if (method_description in data_dictionary) and (data_name in data_dictionary[method_description]):
+                data_array[i, j] = data_dictionary[method_description][data_name]
     print 'Saving array'
     np.savetxt(os.path.join(results_dir, 'summary.csv'), data_array, delimiter=',')
     #### TODO - save names and methods

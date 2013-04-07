@@ -41,4 +41,12 @@ class LogisticRegression_c():
 
     def predict_p(self, X_train, y_train, X_test): 
         return self._model.fit(X_train, y_train).predict_proba(X_test)[:,-1]
+        
+list_of_classifiers = [GaussianNaiveBayes_c(), 
+                       LogisticRegression_c(),
+                       RandomForest_c(100),
+                       RandomForest_c(200),
+                       RandomForest_c(300),
+                       RandomForest_c(400),
+                       RandomForest_c(500)]
     
