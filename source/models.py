@@ -110,5 +110,6 @@ list_of_classifiers = [GaussianNaiveBayes_c()] + \
                       [SGD_c(loss=loss, penalty=penalty) for loss in ['log'] for penalty in ['l1', 'l2', 'elasticnet']] + \
                       [RandomForest_c(n_tree, criterion) for n_tree in [100,200,300,400,500] for criterion in ['gini', 'entropy']] + \
                       [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]] + \
+                      [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [10,25,50] for learn_rate in [0.0001,0.01,1] for max_depth in [1,2]] + \
                       [Tree_c(min_samples_leaf, criterion) for min_samples_leaf in [1,5,10,20,50] for criterion in ['gini', 'entropy']]
     

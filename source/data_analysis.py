@@ -6,6 +6,14 @@ James Robert Lloyd 2013
 
 import os
 import numpy as np
+import matplotlib as plt
+
+#### Utilities
+
+def permutation_indices(data):
+    return sorted(range(len(data)), key = data.__getitem__)
+
+#### Interface
 
 def create_csv_summary(results_dir):
     # Loop over model folders
@@ -32,3 +40,11 @@ def create_csv_summary(results_dir):
     np.savetxt(os.path.join(results_dir, 'summary.csv'), data_array, delimiter=',')
     #### TODO - save names and methods
     return data_array
+    
+def plot_ordered_array(results_dir):
+    # Load array
+    data_array = np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=',')
+    # Mask the NANs
+    mdat = np.ma.masked_array(data_array,np.isnan(data_array))
+    # Display with orderded rows and columns
+    plt.pyplot.imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
