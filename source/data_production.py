@@ -16,7 +16,7 @@ import cloud.mp
 import psutil
 
 from utils.pyroc import AUC
-from utils.data import load_dictionary, split_into_folds, all_data_files, standardise_inputs
+from utils.data import load_dictionary, split_into_folds, all_data_files, standardise_inputs, standardise_outputs
 import models
 
 #### Utilities
@@ -47,7 +47,7 @@ def exp_params_to_str(exp_params):
 #### Experiment coordination
 
 def evaluate_and_save(method, data_file, save_file_name):
-    data = split_into_folds(standardise_inputs(load_dictionary(data_file)))
+    data = split_into_folds(standardise_outputs(standardise_inputs(load_dictionary(data_file))))
     score = np.mean([AUC(method.predict_p(fold['X_train'], fold['y_train'], fold['X_test']), fold['y_test']) for fold in data['folds']])
     save_file_dir = os.path.split(save_file_name)[0]
     if not os.path.isdir(save_file_dir):
@@ -82,3 +82,6 @@ def evaluate_all(exp_params):
             
 def test():
     evaluate_all(exp_param_defaults({'methods' : models.list_of_classifiers}))
+            
+def try_all_datasets():
+    evaluate_all(exp_param_defaults({'methods' : [models.GaussianNaiveBayes_c()], 'sleep_time' : 0, 'multithread' : False}))

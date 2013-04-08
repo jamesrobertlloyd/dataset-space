@@ -52,3 +52,10 @@ def standardise_inputs(data):
     # - Do I even want this function
     #   - Should I return empirical quantiles, or should it just apply a linear transformation?
     return data
+    
+def standardise_outputs(data):
+    max_locations = data['y'] == max(data['y'])
+    min_locations = data['y'] == min(data['y'])
+    data['y'][max_locations] = 1
+    data['y'][min_locations] = -1
+    return data

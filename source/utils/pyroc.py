@@ -31,8 +31,10 @@ except:
 def AUC(predictions, targets):
     '''Just computes the AUC'''
     # Standardise targets
-    targets[targets==max(targets)] = 1
-    targets[targets==min(targets)] = 0
+    max_locations = targets==max(targets)
+    min_locations = targets==min(targets)
+    targets[max_locations] = 1
+    targets[min_locations] = 0
     return ROCData(zip(targets, predictions)).auc()
     
 #### End James Robert Lloyd convenience functions
