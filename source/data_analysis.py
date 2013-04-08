@@ -26,6 +26,8 @@ def create_csv_summary(results_dir):
         for (j, data_name) in enumerate(data_names):
             if (method_description in data_dictionary) and (data_name in data_dictionary[method_description]):
                 data_array[i, j] = data_dictionary[method_description][data_name]
+            else:
+                data_array[i, j] = np.NAN
     print 'Saving array'
     np.savetxt(os.path.join(results_dir, 'summary.csv'), data_array, delimiter=',')
     #### TODO - save names and methods
