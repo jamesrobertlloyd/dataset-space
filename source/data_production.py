@@ -57,7 +57,7 @@ def evaluate_and_save(method, data_file, save_file_name):
     
 def evaluate_all(exp_params):
     job_ids = []
-    for data_file in all_data_files(exp_params['data_dir']):
+    for data_file in sorted(all_data_files(exp_params['data_dir'])):
         #data = split_into_folds(standardise_inputs(load_dictionary(data_file)))
         data_name = os.path.splitext(os.path.basename(data_file))[0]
         for method in exp_params['methods']:
