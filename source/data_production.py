@@ -23,7 +23,7 @@ import models
 
 def exp_param_defaults(exp_params={}):
     '''Sets all missing parameters to their default values'''
-    defaults = {'methods' : [models.GaussianNaiveBayes_c(), models.LogisticRegression_c(), models.RandomForest_c(100), models.RandomForest_c(200), models.RandomForest_c(300)],
+    defaults = {'methods' : models.list_of_classifiers,
                 'data_dir' : '../data/class',
                 'sleep_time' : 2, # Sleep time between experiments, to prevent cloud communication bottlenecks
                 'save_dir' : '../results/class/default',
