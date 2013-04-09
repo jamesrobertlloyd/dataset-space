@@ -53,7 +53,7 @@ def plot_ordered_array(results_dir):
     # Display with orderded rows and columns
     plt.pyplot.imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
     
-def BGPLVM_data(results_dir, n_pseudo_points=10):
+def GPLVM_data(results_dir, n_pseudo_points=10):
     # Load array
     data_array = np.transpose(np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=','))
     # Setup GPLVM
@@ -61,7 +61,8 @@ def BGPLVM_data(results_dir, n_pseudo_points=10):
     Q = 2 # Latent dimensionality
     k = GPy.kern.rbf(Q, ARD=True) + GPy.kern.white(Q, 0.00001)
     # Fit model
-    m = GPy.models.Bayesian_GPLVM(Y=data_array, Q=Q, init='PCA', kernel = k, M=n_pseudo_points)
+    #m = GPy.models.Bayesian_GPLVM(Y=data_array, Q=Q, init='PCA', kernel = k, M=n_pseudo_points)
+    m = GPy.models.GPLVM(Y=data_array, Q=Q, init='PCA', kernel = k)
     m.ensure_default_constraints()
     m.optimize_restarts(robust=True)
     return m
