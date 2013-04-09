@@ -7,6 +7,7 @@ James Robert Lloyd 2013
 import os
 import numpy as np
 import matplotlib as plt
+import GPy
 
 #### Utilities
 
@@ -38,7 +39,10 @@ def create_csv_summary(results_dir):
                 data_array[i, j] = np.NAN
     print 'Saving array'
     np.savetxt(os.path.join(results_dir, 'summary.csv'), data_array, delimiter=',')
-    #### TODO - save names and methods
+    with open(os.path.join(results_dir, 'methods.csv'), 'w') as save_file:
+        save_file.write('\n'.join(method_descriptions))
+    with open(os.path.join(results_dir, 'datasets.csv'), 'w') as save_file:
+        save_file.write('\n'.join(data_names    ))
     return data_array
     
 def plot_ordered_array(results_dir):
@@ -48,3 +52,16 @@ def plot_ordered_array(results_dir):
     mdat = np.ma.masked_array(data_array,np.isnan(data_array))
     # Display with orderded rows and columns
     plt.pyplot.imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
+    
+def BGPLVM_data(results_dir, n_pseudo_points=10):
+    # Load array
+    data_array = np.transpose(np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=','))
+    # Setup GPLVM
+    (N, D) = data_array.shape
+    Q = 2 # Latent dimensionality
+    k = GPy.kern.rbf(Q, ARD=True) + GPy.kern.white(Q, 0.00001)
+    # Fit model
+    m = GPy.models.Bayesian_GPLVM(Y=data_array, Q=Q, init='PCA', kernel = k, M=n_pseudo_points)
+    m.ensure_default_constraints()
+    m.optimize_restarts(robust=True)
+    return m
