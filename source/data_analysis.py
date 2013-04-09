@@ -9,10 +9,19 @@ import numpy as np
 import matplotlib as plt
 import GPy
 
+from pylab import *
+from scipy import *
+
 #### Utilities
 
 def permutation_indices(data):
     return sorted(range(len(data)), key = data.__getitem__)
+    
+def pretty_scatter(x, y, color, radii, labels):
+    for i in range(len(x)):
+        text(x[i], y[i], labels[i], size=6, horizontalalignment='center')
+    sct = scatter(x, y, c=color, s=radii, linewidths=1, edgecolor='w')
+    sct.set_alpha(0.75)
 
 #### Interface
 
@@ -42,7 +51,7 @@ def create_csv_summary(results_dir):
     with open(os.path.join(results_dir, 'methods.csv'), 'w') as save_file:
         save_file.write('\n'.join(method_descriptions))
     with open(os.path.join(results_dir, 'datasets.csv'), 'w') as save_file:
-        save_file.write('\n'.join(data_names    ))
+        save_file.write('\n'.join(data_names))
     return data_array
     
 def plot_ordered_array(results_dir):
@@ -53,16 +62,31 @@ def plot_ordered_array(results_dir):
     # Display with orderded rows and columns
     plt.pyplot.imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
     
-def GPLVM_data(results_dir, n_pseudo_points=10):
+def save_GPLVM_data(results_dir):
     # Load array
     data_array = np.transpose(np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=','))
     # Setup GPLVM
     (N, D) = data_array.shape
     Q = 2 # Latent dimensionality
-    k = GPy.kern.rbf(Q, ARD=True) + GPy.kern.white(Q, 0.00001)
+    k = GPy.kern.rbf(Q, ARD=True) + GPy.kern.white(Q, 0.00001) #### TODO - is this good usage?
     # Fit model
     #m = GPy.models.Bayesian_GPLVM(Y=data_array, Q=Q, init='PCA', kernel = k, M=n_pseudo_points)
     m = GPy.models.GPLVM(Y=data_array, Q=Q, init='PCA', kernel = k)
     m.ensure_default_constraints()
     m.optimize_restarts(robust=True)
-    return m
+    # Save fit
+    np.savetxt(os.path.join(results_dir, 'GPLVM-datasets-2.csv'), m.X, delimiter=',')
+    
+def plot_GPLVM_data(results_dir, method_index=0):
+    # Load relevant datasets
+    data_array = np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=',')
+    X = (np.genfromtxt(os.path.join(results_dir, 'GPLVM-datasets-2.csv'), delimiter=','))
+    datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+    methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+    # Plot
+    clf()
+    pretty_scatter(X[:,0], X[:,1], data_array[method_index,:], 200*np.ones(X[:,0].shape), datasets)
+    xlabel('Dimension 1')
+    ylabel('Dimension 2')
+    title('Performance under %s' % methods[method_index])
+    show()

@@ -1,0 +1,47 @@
+GNB
+KNN 100
+KNN 12
+KNN 16
+KNN 20
+KNN 24
+KNN 28
+KNN 32
+KNN 4
+KNN 50
+KNN 75
+KNN 8
+LR l1 0.001
+LR l1 0.01
+LR l1 0.1
+LR l1 1
+LR l1 10
+LR l1 100
+LR l2 0.001
+LR l2 0.01
+LR l2 0.1
+LR l2 1
+LR l2 10
+LR l2 100
+RF 100 entropy
+RF 100 gini
+RF 200 entropy
+RF 200 gini
+RF 300 entropy
+RF 300 gini
+RF 400 entropy
+RF 400 gini
+RF 500 entropy
+RF 500 gini
+SGD elasticnet log
+SGD l1 log
+SGD l2 log
+Tree 1 entropy
+Tree 1 gini
+Tree 10 entropy
+Tree 10 gini
+Tree 20 entropy
+Tree 20 gini
+Tree 5 entropy
+Tree 5 gini
+Tree 50 entropy
+Tree 50 gini
