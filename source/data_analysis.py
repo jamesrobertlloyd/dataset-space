@@ -89,4 +89,5 @@ def plot_GPLVM_data(results_dir, method_index=0):
     xlabel('Dimension 1')
     ylabel('Dimension 2')
     title('Performance under %s' % methods[method_index])
+    colorbar()
     show()
