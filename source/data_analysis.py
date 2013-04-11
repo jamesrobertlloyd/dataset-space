@@ -6,12 +6,13 @@ James Robert Lloyd 2013
 
 import os
 import numpy as np
-import matplotlib as plt
 import GPy
 from sklearn.mixture import GMM, VBGMM, DPGMM
 
 from pylab import *
 from scipy import *
+
+default_dir = '../results/class/without_gbm/'
 
 #### Utilities
 
@@ -61,7 +62,8 @@ def plot_ordered_array(results_dir):
     # Mask the NANs
     mdat = np.ma.masked_array(data_array,np.isnan(data_array))
     # Display with orderded rows and columns
-    plt.pyplot.imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
+    imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
+    show()
     
 def save_GPLVM_data(results_dir):
     # Load array
@@ -120,3 +122,29 @@ def plot_GPLVM_data_cluster(results_dir, n_clusters=None, VB=False):
     else:
         title('%d clusters with EM' % n_clusters)
     show()
+    
+def produce_co_clustering_table(results_dir=default_dir, model_clusters=6, data_clusters=6):
+    # Load relevant datasets
+    data_array = np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=',')
+    X = (np.genfromtxt(os.path.join(results_dir, 'GPLVM-datasets-2.csv'), delimiter=','))
+    datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+    methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+    # Fit mixture models
+    m_model = GMM(n_components=model_clusters, n_init=20)
+    m_model.fit(data_array)
+    model_C = m_model.predict(data_array)
+    m_data = GMM(n_components=data_clusters, n_init=20)
+    m_data.fit(data_array.T)
+    data_C = m_data.predict(data_array.T)
+    # Produce table
+    performance_table = np.zeros((model_clusters, data_clusters))
+    for model_cluster in range(model_clusters):
+        # print model clusters
+        print 'Model cluster %d' % (model_cluster + 1)
+        for (i, method) in enumerate(methods):
+            if model_C[i] == model_cluster:
+                print method
+        for data_cluster in range(data_clusters):
+            performance_table[model_cluster, data_cluster] = np.mean(data_array[model_C==model_cluster][:,data_C==data_cluster])
+    # Print table
+    print performance_table
