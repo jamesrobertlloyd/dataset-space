@@ -8,6 +8,7 @@ import os
 import numpy as np
 import matplotlib as plt
 import GPy
+from sklearn.mixture import GMM, VBGMM, DPGMM
 
 from pylab import *
 from scipy import *
@@ -90,4 +91,32 @@ def plot_GPLVM_data(results_dir, method_index=0):
     ylabel('Dimension 2')
     title('Performance under %s' % methods[method_index])
     colorbar()
+    show()
+    
+def plot_GPLVM_data_cluster(results_dir, n_clusters=None, VB=False):
+    # Load relevant datasets
+    data_array = np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=',')
+    X = (np.genfromtxt(os.path.join(results_dir, 'GPLVM-datasets-2.csv'), delimiter=','))
+    datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+    methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+    # Fit a mixture model
+    if n_clusters is None:
+        m = DPGMM()
+    elif VB:
+        m = VBGMM(alpha = 10, n_components=n_clusters)
+    else:
+        m = GMM(n_components=n_clusters, n_init=100)
+    m.fit(data_array.T)
+    clusters = m.predict(data_array.T)
+    # Plot
+    clf()
+    pretty_scatter(X[:,0], X[:,1], clusters, 200*np.ones(X[:,0].shape), datasets)
+    xlabel('Dimension 1')
+    ylabel('Dimension 2')
+    if n_clusters is None:
+        title('CRP MoG')
+    elif VB:
+        title('%d clusters with VB' % n_clusters)
+    else:
+        title('%d clusters with EM' % n_clusters)
     show()
