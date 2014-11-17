@@ -177,12 +177,12 @@ class ROCData(object):
 		self.auc() #Seed initial points with default full ROC
 	
 	def auc(self,fpnum=0):
-		""" Uses the trapezoidal ruel to calculate the area under the curve. If fpnum is supplied, it will 
+		""" Uses the trapezoidal rule to calculate the area under the curve. If fpnum is supplied, it will 
 			calculate a partial AUC, up to the number of false positives in fpnum (the partial AUC is scaled
-			to between 0 and 1).
+			to between 0 and 1). 		
 			It assumes that the positive class is expected to have the higher of the scores (s(+) < s(-))
 			Parameters:
-				fpnum: The cumulativr FP count (fps)
+				fpnum: The cumulative FP count (fps)
 			Return:
 			
 		"""
@@ -219,7 +219,10 @@ class ROCData(object):
 			elif relevant_pauc[current_index][0] == 1:
 				tp_count +=1
 			fpr = fp_count/total_n
-			tpr = tp_count/total_p
+			if total_p == 0:
+				tpr = 0
+			else:
+				tpr = tp_count/total_p
 			previous_df = df
 			current_index +=1
 		points.append((fpr,tpr,fp_count)) #Add last point
@@ -289,7 +292,7 @@ class ROCData(object):
 		
 	
 	def confusion_matrix(self,threshold,do_print=False):
-		""" Returns the confusion matrix (in dictionary form) for a fiven threshold
+		""" Returns the confusion matrix (in dictionary form) for a given threshold
 			where all elements > threshold are considered 1 , all else 0.
 			Parameters:
 				threshold: threshold to check the decision function
