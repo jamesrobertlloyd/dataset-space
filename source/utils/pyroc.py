@@ -15,6 +15,7 @@ Python Module for calculating the area under the receive operating characteristi
 0.2 - Updated the code by adding new metrics for analysis with the confusion matrix.
 
 Some convenience functions added by James Robert Lloyd 2013
+Small edit by Rishabh Bhargava Nov, 2014
 
 """
 
