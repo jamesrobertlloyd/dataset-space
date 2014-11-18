@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import LinearSVC
 
 import numpy as np
 
@@ -89,6 +90,20 @@ class SGD_c():
     def predict_p(self, X_train, y_train, X_test): 
         return self._model.fit(X_train, y_train).predict_proba(X_test)[:,-1]
 
+class Linear_SVM_c():
+
+    def __init__(self, loss='l2', penalty='l2'):
+        self.loss = loss
+        self.penalty = penalty
+        self._model = LinearSVC(penalty=penalty, loss=loss)
+
+    def description(self):
+        return 'Linear SVM %s %s' %(self.penalty, self.loss)
+
+    def predict_p(self, X_train, y_train, X_test):
+        return self._model.fit(X_train, y_train).predict(X_test)
+
+
 class KNN_c():
 
     def __init__(self, k=5):
@@ -110,4 +125,5 @@ list_of_classifiers = [GaussianNaiveBayes_c()] + \
                       [RandomForest_c(n_tree, criterion) for n_tree in [100,200,300,400,500] for criterion in ['gini', 'entropy']] + \
                       [Tree_c(min_samples_leaf, criterion) for min_samples_leaf in [1,5,10,20,50] for criterion in ['gini', 'entropy']] + \
                       [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]] + \
-                      [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [10,25,50] for learn_rate in [0.0001,0.01,1] for max_depth in [1,2]] 
+                      [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [10,25,50] for learn_rate in [0.0001,0.01,1] for max_depth in [1,2]] + \
+                      [Linear_SVM_c(loss=loss, penalty='l2') for loss in ['l1', 'l2']]
