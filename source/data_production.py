@@ -12,22 +12,22 @@ James Robert Lloyd 2013
 import numpy as np
 import os.path
 import time
-import cloud.mp
 import psutil
-
+from multiprocessing import Process
 from utils.pyroc import AUC
 from utils.data import load_dictionary, split_into_folds, all_data_files, standardise_inputs, standardise_outputs
-import models
+import models, properties
 
 #### Utilities
 
 def exp_param_defaults(exp_params={}):
     '''Sets all missing parameters to their default values'''
     defaults = {'methods' : models.list_of_classifiers,
+                'properties' : properties.list_of_properties,
                 'data_dir' : '../data/class',
                 'sleep_time' : 2, # Sleep time between experiments, to prevent cloud communication bottlenecks
                 'save_dir' : '../results/class/default',
-                'multithread' : True,
+                'multithread' : False,
                 'overwrite' : False,
                 'max_job_time' : 1,
                 'max_cpu_percent' : 80
@@ -46,9 +46,13 @@ def exp_params_to_str(exp_params):
     
 #### Experiment coordination
 
-def evaluate_and_save(method, data_file, save_file_name):
+def evaluate_and_save(method, is_method, data_file, save_file_name):
     data = split_into_folds(standardise_outputs(standardise_inputs(load_dictionary(data_file))))
-    score = np.mean([AUC(method.predict_p(fold['X_train'], fold['y_train'], fold['X_test']), fold['y_test']) for fold in data['folds']])
+    #print data
+    if is_method:
+        score = np.mean([AUC(method.predict_p(fold['X_train'], fold['y_train'], fold['X_test']), fold['y_test']) for fold in data['folds']])
+    else:
+        score = np.mean([method.get_stat(fold['X_train']) for fold in data['folds']])
     save_file_dir = os.path.split(save_file_name)[0]
     if not os.path.isdir(save_file_dir):
         os.makedirs(save_file_dir)
@@ -67,15 +71,25 @@ def evaluate_all(exp_params):
                     time.sleep(10)
                 print 'Running %s %s' % (data_name, method.description())
                 if exp_params['multithread']:
-                    job_ids.append(cloud.mp.call(evaluate_and_save, method, data_file, save_file_name, _max_runtime=exp_params['max_job_time']))
+                    print "This is wrong"
+                    #job_ids.append(cloud.mp.call(evaluate_and_save, method, data_file, save_file_name, _max_runtime=exp_params['max_job_time']))
                 else:
-                    evaluate_and_save(method, data_file, save_file_name)
-                time.sleep(exp_params['sleep_time'])
+                    evaluate_and_save(method, True, data_file, save_file_name)
+                #time.sleep(exp_params['sleep_time'])
             else:
                 print 'Skipping %s %s' % (data_name, method.description()) 
+        for prop in exp_params['properties']:
+            save_file_name = os.path.join(exp_params['save_dir'], prop.description(), data_name + '.score')
+            if exp_params['overwrite'] or (not os.path.isfile(save_file_name)):
+                while psutil.cpu_percent() > exp_params['max_cpu_percent']:
+                    time.sleep(10)
+                print "Running %s %s" % (data_name, prop.description())
+                evaluate_and_save(prop, False, data_file, save_file_name)
+            else:
+                print "Skipping %s %s" % (data_name, prop.description())
     if exp_params['multithread']:
         print 'Waiting for all jobs to complete'
-        cloud.mp.join(job_ids, ignore_errors=True)
+        #cloud.mp.join(job_ids, ignore_errors=True)
     print 'Finished'
             
 #### Interface
@@ -85,3 +99,5 @@ def test():
             
 def try_all_datasets():
     evaluate_all(exp_param_defaults({'methods' : [models.GaussianNaiveBayes_c()], 'sleep_time' : 0, 'multithread' : False}))
+
+test()

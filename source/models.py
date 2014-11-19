@@ -2,6 +2,7 @@
 Simple interfaces to models
 
 James Robert Lloyd 2013
+Rishabh Bhargava 2014
 '''
 
 from sklearn.naive_bayes import GaussianNB
@@ -103,7 +104,6 @@ class Linear_SVM_c():
     def predict_p(self, X_train, y_train, X_test):
         return self._model.fit(X_train, y_train).predict(X_test)
 
-
 class KNN_c():
 
     def __init__(self, k=5):
@@ -117,7 +117,7 @@ class KNN_c():
         self._model.fit(X_train, y_train)
         # Compute empirical probabilities
         return np.array([np.mean(y_train[self._model.kneighbors(X_test[i,:])[1]]==1) for i in range(X_test.shape[0])])
-        
+
 list_of_classifiers = [GaussianNaiveBayes_c()] + \
                       [KNN_c(k) for k in [4,8,12,16,20,24,28,32,50,75,100]] + \
                       [LogisticRegression_c(C=C, penalty=penalty) for C in [0.001, 0.01, 0.1, 1, 10, 100] for penalty in ['l1', 'l2']] + \
