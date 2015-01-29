@@ -6,13 +6,14 @@ James Robert Lloyd 2013
 
 import os
 import numpy as np
-import GPy
+#import GPy
 from sklearn.mixture import GMM, VBGMM, DPGMM
+from sklearn.decomposition import PCA
 
 from pylab import *
 from scipy import *
 
-default_dir = '../results/class/without_gbm/'
+default_dir = '../results/class/default/'
 
 #### Utilities
 
@@ -29,7 +30,7 @@ def pretty_scatter(x, y, color, radii, labels):
 
 def create_csv_summary(results_dir):
     # Loop over model folders
-    method_descriptions = [adir for adir in sorted(os.listdir(results_dir)) if os.path.isdir(os.path.join(results_dir, adir))]
+    method_descriptions = [adir for adir in sorted(os.listdir(results_dir)) if os.path.isdir(os.path.join(results_dir, adir)) and not (adir.startswith('Kurt'))]
     data_names = []
     data_dictionary = {method_description : {} for method_description in method_descriptions}
     for method_description in method_descriptions:
@@ -61,7 +62,7 @@ def plot_ordered_array(results_dir):
     data_array = np.genfromtxt(os.path.join(results_dir, 'summary.csv'), delimiter=',')
     # Mask the NANs
     mdat = np.ma.masked_array(data_array,np.isnan(data_array))
-    # Display with orderded rows and columns
+    # Display with ordered rows and columns
     imshow(data_array[permutation_indices(list(np.mean(mdat, axis=1).data))][:,permutation_indices(list(np.mean(mdat, axis=0).data))])
     show()
     
@@ -79,6 +80,18 @@ def save_GPLVM_data(results_dir):
     m.optimize_restarts(robust=True)
     # Save fit
     np.savetxt(os.path.join(results_dir, 'GPLVM-datasets-2.csv'), m.X, delimiter=',')
+
+def save_PCA_data(results_dir):
+	# Load array
+	data_array = np.transpose(np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=','))
+	#print data_array
+	(N,D) = data_array.shape
+	print "number of datasets %d, number of methods %d" %(N,D)
+	pca = PCA(n_components = 2)
+	x_new = pca.fit_transform(data_array)
+	print (pca.explained_variance_ratio_)
+	print x_new.shape
+	np.savetxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), x_new, delimiter=',')
     
 def plot_GPLVM_data(results_dir, method_index=0):
     # Load relevant datasets
@@ -94,6 +107,21 @@ def plot_GPLVM_data(results_dir, method_index=0):
     title('Performance under %s' % methods[method_index])
     colorbar()
     show()
+
+def plot_PCA_data(results_dir, method_index=0):
+	# Load relevant datasets
+	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
+	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), delimiter=','))
+	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+	# Plot
+	clf()
+	pretty_scatter(X[:,0], X[:,1], data_array[method_index,:], 200*np.ones(X[:,0].shape), datasets)
+	xlabel('Dimension 1')
+	ylabel('Dimension 2')
+	title('Performance under %s' % methods[method_index])
+	colorbar()
+	show()
     
 def plot_GPLVM_data_cluster(results_dir, n_clusters=None, VB=False):
     # Load relevant datasets
@@ -148,3 +176,11 @@ def produce_co_clustering_table(results_dir=default_dir, model_clusters=6, data_
             performance_table[model_cluster, data_cluster] = np.mean(data_array[model_C==model_cluster][:,data_C==data_cluster])
     # Print table
     print performance_table
+
+#create_csv_summary('../results/class/default/')
+#plot_ordered_array('../results/class/default/')
+#print permutation_indices([3,4,0,1,2])
+method_index = 20
+#plot_GPLVM_data_cluster('../results/class/without_gbm/',method_index)
+#save_PCA_data(default_dir)
+plot_PCA_data(default_dir,method_index)
