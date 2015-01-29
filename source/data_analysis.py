@@ -92,6 +92,17 @@ def save_PCA_data(results_dir):
 	print (pca.explained_variance_ratio_)
 	print x_new.shape
 	np.savetxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), x_new, delimiter=',')
+
+def save_PCA_method(results_dir):
+	# Load array
+	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
+	(N,D) = data_array.shape
+	print "number of methods %d, number of datasets %d" %(N,D)
+	pca = PCA(n_components = 2)
+	x_new = pca.fit_transform(data_array)
+	print (pca.explained_variance_ratio_)
+	print x_new.shape
+	np.savetxt(os.path.join(results_dir,'PCA-methods-2.csv'), x_new, delimiter=',')
     
 def plot_GPLVM_data(results_dir, method_index=0):
     # Load relevant datasets
@@ -108,19 +119,36 @@ def plot_GPLVM_data(results_dir, method_index=0):
     colorbar()
     show()
 
-def plot_PCA_data(results_dir, method_index=0):
+def plot_PCA_data(results_dir, method_index=[26,46,53,66]):
 	# Load relevant datasets
 	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
 	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), delimiter=','))
 	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
 	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
 	# Plot
-	clf()
-	pretty_scatter(X[:,0], X[:,1], data_array[method_index,:], 200*np.ones(X[:,0].shape), datasets)
-	xlabel('Dimension 1')
-	ylabel('Dimension 2')
-	title('Performance under %s' % methods[method_index])
-	colorbar()
+	figure()
+	for i in xrange(len(method_index)):
+		subplot(len(method_index)/2, len(method_index)/2, i)
+		pretty_scatter(X[:,0], X[:,1], data_array[method_index[i]-1,:], 200*np.ones(X[:,0].shape), datasets)
+		xlabel('Dimension 1')
+		ylabel('Dimension 2')
+		title('Performance under %s' % methods[method_index[i]-1])
+		colorbar()
+	show()
+
+def plot_PCA_method_data(results_dir, dataset_index =[1]):
+	data_array = np.transpose(np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=','))
+	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-methods-2.csv'), delimiter=','))
+	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+	figure()
+	for i in xrange(len(dataset_index)):
+		subplot(1, 1, i)
+		pretty_scatter(X[:,0], X[:,1], data_array[dataset_index[i]-1,:], 200*np.ones(X[:,0].shape), methods)
+		xlabel('Dimension 1')
+		ylabel('Dimension 2')
+		title('Performance under %s' % datasets[dataset_index[i]-1])
+		colorbar()
 	show()
     
 def plot_GPLVM_data_cluster(results_dir, n_clusters=None, VB=False):
@@ -139,7 +167,8 @@ def plot_GPLVM_data_cluster(results_dir, n_clusters=None, VB=False):
     m.fit(data_array.T)
     clusters = m.predict(data_array.T)
     # Plot
-    clf()
+    #clf()
+    figure(1)
     pretty_scatter(X[:,0], X[:,1], clusters, 200*np.ones(X[:,0].shape), datasets)
     xlabel('Dimension 1')
     ylabel('Dimension 2')
@@ -177,10 +206,21 @@ def produce_co_clustering_table(results_dir=default_dir, model_clusters=6, data_
     # Print table
     print performance_table
 
-#create_csv_summary('../results/class/default/')
+
+#create_csv_summary(default_dir)
 #plot_ordered_array('../results/class/default/')
 #print permutation_indices([3,4,0,1,2])
-method_index = 20
+
 #plot_GPLVM_data_cluster('../results/class/without_gbm/',method_index)
 #save_PCA_data(default_dir)
-plot_PCA_data(default_dir,method_index)
+
+#save_PCA_method(default_dir)
+plot_PCA_method_data(default_dir)
+
+#method_index=[26,46,53,66]
+#plot_PCA_data(default_dir, method_index)
+#method_index=[6,16,26,36]
+
+#plot_PCA_data(default_dir,method_index)
+#method_index = [71,78,26,89]
+#plot_PCA_data(default_dir,method_index)
