@@ -95,7 +95,7 @@ def evaluate_all(exp_params):
 #### Interface
             
 def test():
-    evaluate_all(exp_param_defaults({'methods' : models.list_of_classifiers}))
+    evaluate_all(exp_param_defaults({'methods' : models.GBM_classifiers, 'overwrite': True}))
             
 def try_all_datasets():
     evaluate_all(exp_param_defaults({'methods' : [models.GaussianNaiveBayes_c()], 'sleep_time' : 0, 'multithread' : False}))

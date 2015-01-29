@@ -127,3 +127,5 @@ list_of_classifiers = [GaussianNaiveBayes_c()] + \
                       [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]] + \
                       [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [10,25,50] for learn_rate in [0.0001,0.01,1] for max_depth in [1,2]] + \
                       [Linear_SVM_c(loss=loss, penalty='l2') for loss in ['l1', 'l2']]
+
+GBM_classifiers = [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]]

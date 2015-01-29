@@ -17,7 +17,7 @@ print data.shape
 plt.imshow(np.array(data), cmap=plt.cm.Blues)
 plt.title("Original dataset")
 
-model = SpectralCoclustering(n_clusters=3, random_state=0)
+model = SpectralCoclustering(n_clusters=8, random_state=0)
 model.fit(data)
 
 fit_data = data[np.argsort(model.row_labels_)]
@@ -27,3 +27,5 @@ plt.matshow(fit_data, cmap=plt.cm.Blues)
 plt.title("After biclustering; rearranged to show biclusters")
 
 plt.show()
+
+#TODO: Read the paper again, PCA, 
