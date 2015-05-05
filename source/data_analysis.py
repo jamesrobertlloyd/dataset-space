@@ -6,9 +6,9 @@ James Robert Lloyd 2013
 
 import os
 import numpy as np
-#import GPy
+
 from sklearn.mixture import GMM, VBGMM, DPGMM
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, FactorAnalysis
 
 from pylab import *
 from scipy import *
@@ -30,7 +30,7 @@ def pretty_scatter(x, y, color, radii, labels):
 
 def create_csv_summary(results_dir):
     # Loop over model folders
-    method_descriptions = [adir for adir in sorted(os.listdir(results_dir)) if os.path.isdir(os.path.join(results_dir, adir)) and not (adir.startswith('Kurt'))]
+    method_descriptions = [adir for adir in sorted(os.listdir(results_dir)) if os.path.isdir(os.path.join(results_dir, adir)) and not (adir.startswith('Kurt')) and not (adir.startswith('GBM 100')) and not (adir.startswith('GBM 300'))]
     data_names = []
     data_dictionary = {method_description : {} for method_description in method_descriptions}
     for method_description in method_descriptions:
@@ -136,7 +136,7 @@ def plot_PCA_data(results_dir, method_index=[26,46,53,66]):
 		colorbar()
 	show()
 
-def plot_PCA_method_data(results_dir, dataset_index =[1]):
+def plot_PCA_method_data(results_dir, dataset_index =[5]):
 	data_array = np.transpose(np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=','))
 	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-methods-2.csv'), delimiter=','))
 	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
@@ -206,18 +206,84 @@ def produce_co_clustering_table(results_dir=default_dir, model_clusters=6, data_
     # Print table
     print performance_table
 
+def factor_analysis(results_dir):
+	data_array = np.transpose(np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=','))
+	fa = FactorAnalysis(n_components = 2)
+	new_array = fa.fit_transform(data_array)
+	print fa.get_covariance().shape
+	print new_array
+	np.savetxt(os.path.join(results_dir,'FA-datasets-2.csv'), new_array, delimiter=',')
+
+def factor_analyses(results_dir):
+	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
+	fa1 = FactorAnalysis(n_components = 1)
+	new_array_gbm = fa1.fit_transform(np.transpose(data_array[range(15)]))
+	print new_array_gbm.shape
+	fa2 = FactorAnalysis(n_components = 1)
+	new_array_tree = fa2.fit_transform(np.transpose(data_array[range(41,51) + range(54,64)]))
+	print new_array_tree.shape
+
+	fa3 = FactorAnalysis(n_components = 1)
+	new_array_lin = fa3.fit_transform(np.transpose(data_array[range(27,41) + range(51,54)]))
+
+	fa4 = FactorAnalysis(n_components = 1)
+	new_array_knn = fa4.fit_transform(np.transpose(data_array[range(16,27)]))
+
+	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+	figure()
+	pretty_scatter(new_array_tree, [1 for x in range(115)], data_array[46], 200*np.ones(new_array_tree.shape), datasets)
+
+
+	figure()
+	scatter(new_array_gbm, new_array_tree)
+	#for i in xrange(len(datasets)):
+	#	annotate(datasets[i], xy = (new_array_gbm[i], new_array_tree[i]))
+	xlabel('GBM')
+	ylabel('Tree')
+
+	figure()
+	scatter(new_array_lin, new_array_tree)
+	xlabel('Linear')
+	ylabel('Tree')
+
+	figure()
+	scatter(new_array_knn, new_array_tree)
+	xlabel('KNN')
+	ylabel('Tree')
+
+	show()
+
+def plot_FA_data(results_dir, method_index=1):
+	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
+	X = (np.genfromtxt(os.path.join(results_dir, 'FA-datasets-2.csv'), delimiter=','))
+	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+
+	figure()
+	pretty_scatter(X[:,0], X[:,1], data_array[method_index-1,:], 200*np.ones(X[:,0].shape), datasets)
+	xlabel('Dimension 1')
+	ylabel('Dimension 2')
+	title('Performance under %s' % methods[method_index-1])
+	colorbar()
+	show()
 
 #create_csv_summary(default_dir)
 #plot_ordered_array('../results/class/default/')
 #print permutation_indices([3,4,0,1,2])
 
+#factor_analysis(default_dir)
+#plot_FA_data(default_dir)
+
+factor_analyses(default_dir)
+
 #plot_GPLVM_data_cluster('../results/class/without_gbm/',method_index)
 #save_PCA_data(default_dir)
 
 #save_PCA_method(default_dir)
-plot_PCA_method_data(default_dir)
+#plot_PCA_method_data(default_dir)
 
-#method_index=[26,46,53,66]
+#method_index=[10,16,23,32]
 #plot_PCA_data(default_dir, method_index)
 #method_index=[6,16,26,36]
 

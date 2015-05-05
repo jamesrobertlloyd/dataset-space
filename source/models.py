@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 
 import numpy as np
 
@@ -118,6 +118,20 @@ class KNN_c():
         # Compute empirical probabilities
         return np.array([np.mean(y_train[self._model.kneighbors(X_test[i,:])[1]]==1) for i in range(X_test.shape[0])])
 
+class SVM_c():
+
+    def __init__(self, C = 1.0, kernel = 'rbf', degree = 3):
+        self.C = C
+        self.kernel = kernel
+        self.degree = degree
+        self.model = SVC(C=C, kernel = kernel, degree = degree)
+
+    def description(self):
+        return 'SVC %s %s %s' %(self.C, self.kernel, self.degree)
+
+    def predict_p(self, X_train, y_train, X_test):
+        self.model.fit(X_train, y_train).predict(X_test)
+
 list_of_classifiers = [GaussianNaiveBayes_c()] + \
                       [KNN_c(k) for k in [4,8,12,16,20,24,28,32,50,75,100]] + \
                       [LogisticRegression_c(C=C, penalty=penalty) for C in [0.001, 0.01, 0.1, 1, 10, 100] for penalty in ['l1', 'l2']] + \
@@ -129,3 +143,7 @@ list_of_classifiers = [GaussianNaiveBayes_c()] + \
                       [Linear_SVM_c(loss=loss, penalty='l2') for loss in ['l1', 'l2']]
 
 GBM_classifiers = [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]]
+LSVM_classifiers = [Linear_SVM_c(loss=loss, penalty='l2') for loss in ['l1', 'l2']]
+SVM_classifiers = [SVM_c(C=C, kernel = kernel) for C in [1,0.1,0.01] for kernel in ['rbf', 'sigmoid']] + [SVM_c(C=C, kernel = 'poly', degree= degree) for C in [1,0.1] for degree in [2,3,5]]
+
+print SVM_classifiers
