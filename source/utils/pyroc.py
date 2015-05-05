@@ -36,6 +36,8 @@ def AUC(predictions, targets):
     min_locations = targets==min(targets)
     targets[max_locations] = 1
     targets[min_locations] = 0
+    #print targets
+    #print predictions
     return ROCData(zip(targets, predictions)).auc()
     
 #### End James Robert Lloyd convenience functions
