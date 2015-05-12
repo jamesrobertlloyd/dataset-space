@@ -29,12 +29,16 @@ def yield_points(n,k,p):
 	A = np.random.rand(n,k)
 	for i in xrange(p):
 		x = (2*np.random.rand(n) - 1)[order]
-		temp = [np.dot(A[j,:], x) for j in range(n)]
-		X.append(temp)
-		if np.dot(temp,a) > 0:
-			y.append(1)
+		temp = np.asarray([np.dot(A[j,:], x) for j in range(n)])
+		if len(X) == 0:
+			X = temp
 		else:
-			y.append(-1)
+			X = np.vstack((X, temp))
+		#print X
+		if np.dot(temp,a) > 0:
+			y = np.append(y, 1)
+		else:
+			y = np.append(y, -1)
 	return (X,y)
 
 
@@ -44,6 +48,8 @@ x = [a[0] for a in test]
 y = [a[1] for a in test]
 '''
 X,c=  yield_points(2,1,10)
+print X
+print type(c)
 for i in xrange(len(c)):
 	if c[i] == 1:
 		temp = 'o'
