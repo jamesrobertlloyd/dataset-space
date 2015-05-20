@@ -6,7 +6,7 @@ James Robert Lloyd 2013
 
 import os
 import numpy as np
-
+import math
 from sklearn.mixture import GMM, VBGMM, DPGMM
 from sklearn.decomposition import PCA, FactorAnalysis
 
@@ -35,7 +35,7 @@ def create_csv_summary(results_dir):
     data_dictionary = {method_description : {} for method_description in method_descriptions}
     for method_description in method_descriptions:
         print 'Reading %s' % method_description
-        data_names = sorted(list(set(data_names + [os.path.splitext(file_name)[0] for file_name in [full_path for full_path in sorted(os.listdir(os.path.join(results_dir, method_description))) if full_path[-6:] == '.score']])))
+        data_names = sorted(list(set(data_names + [os.path.splitext(file_name)[0] for file_name in [full_path for full_path in sorted(os.listdir(os.path.join(results_dir, method_description))) if full_path[-6:] == '.score' and not (full_path.startswith('rand'))]])))
         for data_name in [file_name for file_name in sorted(os.listdir(os.path.join(results_dir, method_description))) if file_name[-6:] == '.score']:
             with open(os.path.join(results_dir, method_description, data_name), 'rb') as score_file:
                 score = float(score_file.read())
@@ -84,6 +84,9 @@ def save_GPLVM_data(results_dir):
 def save_PCA_data(results_dir):
 	# Load array
 	data_array = np.transpose(np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=','))
+	print np.isnan(data_array)
+	data_array = np.ma.masked_array(data_array,np.isnan(data_array))
+	print np.isnan(data_array)
 	#print data_array
 	(N,D) = data_array.shape
 	print "number of datasets %d, number of methods %d" %(N,D)
@@ -91,7 +94,7 @@ def save_PCA_data(results_dir):
 	x_new = pca.fit_transform(data_array)
 	print (pca.explained_variance_ratio_)
 	print x_new.shape
-	np.savetxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), x_new, delimiter=',')
+	np.savetxt(os.path.join(results_dir, 'PCA-datasets-3.csv'), x_new, delimiter=',')
 
 def save_PCA_method(results_dir):
 	# Load array
@@ -119,7 +122,7 @@ def plot_GPLVM_data(results_dir, method_index=0):
     colorbar()
     show()
 
-def plot_PCA_data(results_dir, method_index=[26,46,53,66]):
+def plot_PCA_data(results_dir, method_index=[26,36,13,43]):
 	# Load relevant datasets
 	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
 	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), delimiter=','))
@@ -268,18 +271,48 @@ def plot_FA_data(results_dir, method_index=1):
 	colorbar()
 	show()
 
+def get_statistics(results_dir):
+	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
+	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
+	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
+	nr = []
+	nc = []
+	for dataset in datasets:
+		with open(results_dir + 'Num_rows/' + dataset + '.score', 'r') as rowfile:
+			r = float(rowfile.read())
+			#if r > 10000:
+			#	print dataset
+			nr.append(r)
+
+		with open(results_dir + 'Num_colms/' + dataset + '.score', 'r') as colfile:
+			c = float(colfile.read())
+			#if c > 1000:
+			#	c = 10
+			nc.append(c)
+
+
+	means = np.mean(data_array,axis=0)
+	figure()
+	pretty_scatter([math.log(n) for n in nc], [math.log(n) for n in nr], means, 200*np.ones(len(nc)), datasets)
+	colorbar()
+	show()
+
 #create_csv_summary(default_dir)
-#plot_ordered_array('../results/class/default/')
+#plot_ordered_array(default_dir)
 #print permutation_indices([3,4,0,1,2])
 
 #factor_analysis(default_dir)
 #plot_FA_data(default_dir)
 
-factor_analyses(default_dir)
+#factor_analyses(default_dir)
 
 #plot_GPLVM_data_cluster('../results/class/without_gbm/',method_index)
 #save_PCA_data(default_dir)
 
+get_statistics(default_dir)
+
+#plot_PCA_data(default_dir)
+#show()
 #save_PCA_method(default_dir)
 #plot_PCA_method_data(default_dir)
 
