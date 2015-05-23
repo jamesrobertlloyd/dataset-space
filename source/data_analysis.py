@@ -22,7 +22,7 @@ def permutation_indices(data):
     
 def pretty_scatter(x, y, color, radii, labels):
     for i in range(len(x)):
-        text(x[i], y[i], labels[i], size=6, horizontalalignment='center')
+        text(x[i], y[i], labels[i], size=8, horizontalalignment='center')
     sct = scatter(x, y, c=color, s=radii, linewidths=1, edgecolor='w')
     sct.set_alpha(0.75)
 
@@ -30,12 +30,12 @@ def pretty_scatter(x, y, color, radii, labels):
 
 def create_csv_summary(results_dir):
     # Loop over model folders
-    method_descriptions = [adir for adir in sorted(os.listdir(results_dir)) if os.path.isdir(os.path.join(results_dir, adir)) and not (adir.startswith('Kurt')) and not (adir.startswith('GBM 100')) and not (adir.startswith('GBM 300'))]
+    method_descriptions = [adir for adir in sorted(os.listdir(results_dir)) if os.path.isdir(os.path.join(results_dir, adir)) and not (adir.startswith('GBM 100')) and not (adir.startswith('GBM 300'))]# and not (adir.startswith('Kurt'))]
     data_names = []
     data_dictionary = {method_description : {} for method_description in method_descriptions}
     for method_description in method_descriptions:
         print 'Reading %s' % method_description
-        data_names = sorted(list(set(data_names + [os.path.splitext(file_name)[0] for file_name in [full_path for full_path in sorted(os.listdir(os.path.join(results_dir, method_description))) if full_path[-6:] == '.score' and not (full_path.startswith('rand'))]])))
+        data_names = sorted(list(set(data_names + [os.path.splitext(file_name)[0] for file_name in [full_path for full_path in sorted(os.listdir(os.path.join(results_dir, method_description))) if full_path[-6:] == '.score']])))# and not (full_path.startswith('rand'))]])))
         for data_name in [file_name for file_name in sorted(os.listdir(os.path.join(results_dir, method_description))) if file_name[-6:] == '.score']:
             with open(os.path.join(results_dir, method_description, data_name), 'rb') as score_file:
                 score = float(score_file.read())
@@ -50,10 +50,10 @@ def create_csv_summary(results_dir):
             else:
                 data_array[i, j] = np.NAN
     print 'Saving array'
-    np.savetxt(os.path.join(results_dir, 'summary.csv'), data_array, delimiter=',')
-    with open(os.path.join(results_dir, 'methods.csv'), 'w') as save_file:
+    np.savetxt(os.path.join(results_dir, 'summary_complete_ish.csv'), data_array, delimiter=',')
+    with open(os.path.join(results_dir, 'methods_complete_ish.csv'), 'w') as save_file:
         save_file.write('\n'.join(method_descriptions))
-    with open(os.path.join(results_dir, 'datasets.csv'), 'w') as save_file:
+    with open(os.path.join(results_dir, 'datasets_complete_ish.csv'), 'w') as save_file:
         save_file.write('\n'.join(data_names))
     return data_array
     
@@ -94,7 +94,7 @@ def save_PCA_data(results_dir):
 	x_new = pca.fit_transform(data_array)
 	print (pca.explained_variance_ratio_)
 	print x_new.shape
-	np.savetxt(os.path.join(results_dir, 'PCA-datasets-3.csv'), x_new, delimiter=',')
+	np.savetxt(os.path.join(results_dir, 'PCA-datasets-4.csv'), x_new, delimiter=',')
 
 def save_PCA_method(results_dir):
 	# Load array
@@ -105,7 +105,7 @@ def save_PCA_method(results_dir):
 	x_new = pca.fit_transform(data_array)
 	print (pca.explained_variance_ratio_)
 	print x_new.shape
-	np.savetxt(os.path.join(results_dir,'PCA-methods-2.csv'), x_new, delimiter=',')
+	np.savetxt(os.path.join(results_dir,'PCA-methods-4.csv'), x_new, delimiter=',')
     
 def plot_GPLVM_data(results_dir, method_index=0):
     # Load relevant datasets
@@ -125,14 +125,14 @@ def plot_GPLVM_data(results_dir, method_index=0):
 def plot_PCA_data(results_dir, method_index=[26,36,13,43]):
 	# Load relevant datasets
 	data_array = np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=',')
-	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-datasets-2.csv'), delimiter=','))
+	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-datasets-4.csv'), delimiter=','))
 	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
 	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
 	# Plot
 	figure()
 	for i in xrange(len(method_index)):
 		subplot(len(method_index)/2, len(method_index)/2, i)
-		pretty_scatter(X[:,0], X[:,1], data_array[method_index[i]-1,:], 200*np.ones(X[:,0].shape), datasets)
+		pretty_scatter(X[:,0], X[:,1], data_array[method_index[i]-1,:], 200*np.ones(X[:,0].shape), ['' for d in datasets])
 		xlabel('Dimension 1')
 		ylabel('Dimension 2')
 		title('Performance under %s' % methods[method_index[i]-1])
@@ -141,7 +141,7 @@ def plot_PCA_data(results_dir, method_index=[26,36,13,43]):
 
 def plot_PCA_method_data(results_dir, dataset_index =[5]):
 	data_array = np.transpose(np.genfromtxt(os.path.join(results_dir,'summary.csv'),delimiter=','))
-	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-methods-2.csv'), delimiter=','))
+	X = (np.genfromtxt(os.path.join(results_dir, 'PCA-methods-4.csv'), delimiter=','))
 	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
 	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
 	figure()
@@ -235,26 +235,39 @@ def factor_analyses(results_dir):
 	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets.csv'), 'r').readlines()]
 	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods.csv'), 'r').readlines()]
 	figure()
-	pretty_scatter(new_array_tree, [1 for x in range(115)], data_array[46], 200*np.ones(new_array_tree.shape), datasets)
-
-
-	figure()
-	scatter(new_array_gbm, new_array_tree)
-	#for i in xrange(len(datasets)):
-	#	annotate(datasets[i], xy = (new_array_gbm[i], new_array_tree[i]))
-	xlabel('GBM')
-	ylabel('Tree')
+	pretty_scatter(new_array_tree, [1 for x in range(115)], data_array[46], 200*np.ones(new_array_tree.shape), ['' for d in datasets])
+	xlabel('Dimension 1')
+	ylabel('Arbitrary Dimension 2')
+	colorbar()
 
 	figure()
-	scatter(new_array_lin, new_array_tree)
+
+	plot(new_array_lin, new_array_tree, 'bo')
 	xlabel('Linear')
-	ylabel('Tree')
+	ylabel('Tree + RF')
 
 	figure()
+	subplot(2,2,1)
+	scatter(new_array_gbm, new_array_tree)
+	xlabel('GBM')
+	ylabel('Tree + RF')
+
+	#figure()
+	subplot(2,2,2)
 	scatter(new_array_knn, new_array_tree)
 	xlabel('KNN')
-	ylabel('Tree')
+	ylabel('Tree + RF')
 
+	#figure()
+	subplot(2,2,3)
+	scatter(new_array_knn, new_array_lin)
+	xlabel('KNN')
+	ylabel('Linear')
+
+	subplot(2,2,4)
+	scatter(new_array_gbm, new_array_lin)
+	xlabel('GBM')
+	ylabel('Linear')
 	show()
 
 def plot_FA_data(results_dir, method_index=1):
@@ -293,9 +306,28 @@ def get_statistics(results_dir):
 
 	means = np.mean(data_array,axis=0)
 	figure()
-	pretty_scatter([math.log(n) for n in nc], [math.log(n) for n in nr], means, 200*np.ones(len(nc)), datasets)
+	pretty_scatter([math.log10(n) for n in nr], [math.log10(nn) for nn in nc], means, 200*np.ones(len(nc)), ['' for d in datasets])
 	colorbar()
+	xlabel('Number of rows in dataset')
+	ylabel('Number of columns in dataset')
 	show()
+
+
+def exp_stats(results_dir):
+	data_array = np.genfromtxt(os.path.join(results_dir,'summary_complete_ish.csv'),delimiter=',')
+	datasets = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'datasets_complete_ish.csv'), 'r').readlines()]
+	methods = [line.rstrip('\n') for line in open(os.path.join(results_dir, 'methods_complete_ish.csv'), 'r').readlines()]
+
+	means_datasets = np.mean(data_array,axis=0)
+	means_methods = np.mean(data_array,axis=1)
+
+	with open(os.path.join(results_dir, 'avg_datasets_score.csv'), 'w') as save_file:
+		for i,d in enumerate(datasets):
+			save_file.write(d + ',' + str(means_datasets[i]) + '\n')
+
+	with open(os.path.join(results_dir, 'avg_methods_score.csv'), 'w') as save_file:
+		for i,d in enumerate(methods):
+			save_file.write(d + ',' + str(means_methods[i]) + '\n')
 
 #create_csv_summary(default_dir)
 #plot_ordered_array(default_dir)
@@ -304,14 +336,15 @@ def get_statistics(results_dir):
 #factor_analysis(default_dir)
 #plot_FA_data(default_dir)
 
-#factor_analyses(default_dir)
+factor_analyses(default_dir)
 
 #plot_GPLVM_data_cluster('../results/class/without_gbm/',method_index)
 #save_PCA_data(default_dir)
 
-get_statistics(default_dir)
-
-#plot_PCA_data(default_dir)
+#create_csv_summary(default_dir)
+#get_statistics(default_dir)
+#exp_stats(default_dir)
+#plot_PCA_data(default_dir, [41, 50, 53, 57])
 #show()
 #save_PCA_method(default_dir)
 #plot_PCA_method_data(default_dir)
