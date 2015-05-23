@@ -132,18 +132,22 @@ class SVM_c():
     def predict_p(self, X_train, y_train, X_test):
         self.model.fit(X_train, y_train).predict(X_test)
 
+#################################
+# KNN 50, 75, 100 removed for now
+#################################
+
 list_of_classifiers = [GaussianNaiveBayes_c()] + \
-                      [KNN_c(k) for k in [4,8,12,16,20,24,28,32,50,75,100]] + \
+                      [KNN_c(k) for k in [4,8,12,16,20,24,28,32]] + \
                       [LogisticRegression_c(C=C, penalty=penalty) for C in [0.001, 0.01, 0.1, 1, 10, 100] for penalty in ['l1', 'l2']] + \
                       [SGD_c(loss=loss, penalty=penalty) for loss in ['log'] for penalty in ['l1', 'l2', 'elasticnet']] + \
                       [RandomForest_c(n_tree, criterion) for n_tree in [100,200,300,400,500] for criterion in ['gini', 'entropy']] + \
                       [Tree_c(min_samples_leaf, criterion) for min_samples_leaf in [1,5,10,20,50] for criterion in ['gini', 'entropy']] + \
                       [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]] + \
-                      [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [10,25,50] for learn_rate in [0.0001,0.01,1] for max_depth in [1,2]] + \
                       [Linear_SVM_c(loss=loss, penalty='l2') for loss in ['l1', 'l2']]
 
 GBM_classifiers = [GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [100,300,500] for learn_rate in [0.0001,0.001,0.01,0.1,1] for max_depth in [1,3,5]]
 LSVM_classifiers = [Linear_SVM_c(loss=loss, penalty='l2') for loss in ['l1', 'l2']]
 SVM_classifiers = [SVM_c(C=C, kernel = kernel) for C in [1,0.1,0.01] for kernel in ['rbf', 'sigmoid']] + [SVM_c(C=C, kernel = 'poly', degree= degree) for C in [1,0.1] for degree in [2,3,5]]
 
-print SVM_classifiers
+#print SVM_classifiers
+#[GBM_c(n_estimators, learn_rate, max_depth) for n_estimators in [10,25,50] for learn_rate in [0.0001,0.01,1] for max_depth in [1,2]]

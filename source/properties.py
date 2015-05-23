@@ -22,4 +22,20 @@ class Kurtosis_p():
 		else:
 			return max([kurtosis(X_train[:,i]) for i in range(len(X_train[0]))])
 
-list_of_properties = [Kurtosis_p(agg) for agg in ['avg', 'max']]
+class Num_rows():
+
+	def description(self):
+		return "Num_rows"
+
+	def get_stat(self, X_train):
+		return len(X_train)
+
+class Num_columns():
+
+	def description(self):
+		return "Num_colms"
+
+	def get_stat(self, X_train):
+		return len(X_train[0])
+
+list_of_properties = [Kurtosis_p(agg) for agg in ['avg', 'max']] +[Num_rows(), Num_columns()]
